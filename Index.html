@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDGEGO | Trading Journal</title>
+<style>
+:root {
+  --bg:#f4f7fc;--panel:#fff;--text:#17243b;--muted:#718096;
+  --line:#e5eaf2;--blue:#2878f0;--teal:#16b9b0;
+  --green:#13a875;--red:#e05260;
+}
+body.dark {
+  --bg:#0c1220;--panel:#151e30;--text:#edf3ff;
+  --muted:#9aa9c0;--line:#27344a;--blue:#438cff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:Arial,sans-serif;transition:.2s}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{width:235px;background:var(--panel);border-right:1px solid var(--line);
+padding:22px 15px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;margin:0 0 30px 5px}
+.logo{width:43px;height:43px}
+.brand h2{margin:0;font-size:21px;letter-spacing:2px}
+.brand small{color:var(--muted);font-size:9px;letter-spacing:2px}
+.nav{display:grid;gap:7px}
+.nav button{border:0;background:transparent;color:var(--muted);
+text-align:left;padding:13px;border-radius:10px;font-weight:600}
+.nav button.active,.nav button:hover{background:rgba(40,120,240,.12);color:var(--blue)}
+.side-bottom{margin-top:35px}
+.main{flex:1;min-width:0;padding:25px;max-width:1500px;margin:auto;width:100%}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:25px}
+.top h1{font-size:25px;margin:0}
+.top p{margin:5px 0;color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:9px;padding:10px 14px;background:var(--blue);
+color:white;font-weight:600}
+.btn.secondary{background:var(--panel);color:var(--text);border:1px solid var(--line)}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;
+padding:18px;margin-bottom:15px;min-width:0}
+.card h3{margin:0 0 14px;font-size:15px}
+.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:12px}
+.stat span{font-size:12px;color:var(--muted)}
+.section-title{margin:25px 0 13px;font-size:17px}
+.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:12px 9px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+.table-wrap{overflow-x:auto}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+border-radius:9px;background:var(--bg);color:var(--text);outline:none}
+textarea{resize:vertical;min-height:80px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field{margin-bottom:13px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form-grid .full{grid-column:1/-1}
+.empty{text-align:center;padding:30px;color:var(--muted)}
+.pill{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;
+background:rgba(40,120,240,.12);color:var(--blue)}
+.good{color:var(--green)}.bad{color:var(--red)}
+.checkline{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--text)}
+.checkline input{width:auto}
+.event{padding:12px;border-left:3px solid var(--blue);background:var(--bg);
+border-radius:7px;margin:10px 0}
+.chat-box{height:390px;overflow:auto;background:var(--bg);border:1px solid var(--line);
+border-radius:12px;padding:14px;margin-bottom:12px}
+.message{padding:11px 13px;border-radius:12px;margin:9px 0;max-width:88%;
+font-size:14px;line-height:1.5;white-space:pre-wrap}
+.bot{background:var(--panel);border:1px solid var(--line)}
+.user{background:var(--blue);color:white;margin-left:auto}
+.chat-input{display:flex;gap:8px}
+.chat-input input{flex:1;min-width:0}
+.chart{width:100%;height:180px}
+.chart svg{width:100%;height:100%}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
+@media(max-width:850px){
+ .sidebar{width:68px;padding:15px 7px}
+ .brand{margin:0 0 25px}.brand h2,.brand small,.nav .nav-label{display:none}
+ .logo{width:43px}.nav button{text-align:center;font-size:19px;padding:13px 5px}
+ .side-bottom{margin-top:25px}
+ .main{padding:17px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px){
+ .top{align-items:flex-start}.top h1{font-size:21px}
+ .grid{gap:8px}.card{padding:13px}
+ .stat strong{font-size:20px}
+ .form-grid{grid-template-columns:1fr}
+ .form-grid .full{grid-column:auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 100 100" aria-label="EDGEGO logo">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="1" x2="1" y2="0">
+          <stop stop-color="#16b9b0"/><stop offset="1" stop-color="#2878f0"/>
+        </linearGradient>
+      </defs>
+      <path d="M12 72 L12 28 Q12 12 29 12 H70" fill="none" stroke="url(#lg)" stroke-width="10" stroke-linecap="round"/>
+      <path d="M12 50 H60 M12 72 H48" stroke="url(#lg)" stroke-width="9" stroke-linecap="round"/>
+      <path d="M42 61 L65 38 L76 48 L94 20" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M76 20 H94 V38" fill="none" stroke="url(#lg)" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <div><h2>EDGEGO</h2><small>TRADE • PLAN • GROW</small></div>
+  </div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard">◫ <span class="nav-label">Dashboard</span></button>
+    <button data-page="journal">▤ <span class="nav-label">Journal</span></button>
+    <button data-page="calendar">▦ <span class="nav-label">Calendar</span></button>
+    <button data-page="news">◉ <span class="nav-label">News</span></button>
+    <button data-page="strategy">⌁ <span class="nav-label">Strategy</span></button>
+    <button data-page="edge">✓ <span class="nav-label">Edge Checklist</span></button>
+    <button data-page="chat">✦ <span class="nav-label">Edge AI Chat</span></button>
+  </nav>
+  <div class="side-bottom">
+    <button class="btn secondary" style="width:100%" id="themeBtn">☾ <span class="nav-label">Change theme</span></button>
+  </div>
+</aside>
+
+<main class="main">
+<header class="top">
+  <div><h1 id="pageTitle">Dashboard</h1><p>Your trading progress at a glance.</p></div>
+  <div class="actions">
+    <button class="btn secondary" id="exportBtn">Export CSV</button>
+  </div>
+</header>
+
+<section class="page active" id="dashboard">
+  <div class="grid">
+    <div class="card stat"><small>Total trades</small><strong id="totalTrades">0</strong><span>Recorded trades</span></div>
+    <div class="card stat"><small>Net P&L</small><strong id="netPnl">0.00</strong><span>From your journal</span></div>
+    <div class="card stat"><small>Win rate</small><strong id="winRate">0%</strong><span>Winning trades</span></div>
+    <div class="card stat"><small>Average R:R</small><strong id="avgRR">0.00</strong><span>Recorded R:R</span></div>
+  </div>
+  <h3 class="section-title">Equity overview</h3>
+  <div class="card">
+    <h3>Trade performance</h3>
+    <div class="chart"><svg id="equityChart" viewBox="0 0 700 180" preserveAspectRatio="none"></svg></div>
+    <small class="muted">Based on the net P&L of your recorded trades.</small>
+  </div>
+  <h3 class="section-title">Recent trades</h3>
+  <div class="card table-wrap">
+    <table><thead><tr><th>Date</th><th>Symbol</th><th>Direction</th><th>P&L</th></tr></thead>
+    <tbody id="recentTrades"></tbody></table>
+    <div id="recentEmpty" class="empty">Your recent trades will appear here.</div>
+  </div>
+</section>
+
+<section class="page" id="journal">
+  <div class="card">
+    <h3>Add a journal entry</h3>
+    <form id="tradeForm">
+      <div class="form-grid">
+        <div class="field"><label>Date</label><input type="date" id="date" required></div>
+        <div class="field"><label>Symbol</label><input id="symbol" placeholder="EURUSD, US500..." required></div>
+        <div class="field"><label>Direction</label><select id="direction"><option>Buy</option><option>Sell</option></select></div>
+        <div class="field"><label>Session</label><select id="session"><option>London</option><option>New York</option><option>Asian</option><option>Other</option></select></div>
+        <div class="field"><label>Entry price</label><input type="number" step="any" id="entry" placeholder="Entry"></div>
+        <div class="field"><label>Exit price</label><input type="number" step="any" id="exit" placeholder="Exit"></div>
+        <div class="field"><label>Stop loss</label><input type="number" step="any" id="sl" placeholder="SL"></div>
+        <div class="field"><label>Take profit</label><input type="number" step="any" id="tp" placeholder="TP"></div>
+        <div class="field"><label>Net P&L</label><input type="number" step="any" id="pnl" placeholder="e.g. 25 or -10" required></div>
+        <div class="field"><label>R:R</label><input type="number" step="any" id="rr" placeholder="e.g. 2"></div>
+        <div class="field"><label>Setup quality</label><select id="quality"><option>A+</option><option>A</option><option>B</option><option>C</option></select></div>
+        <div class="field"><label>Emotion</label><select id="emotion"><option>Calm</option><option>Confident</option><option>Impatient</option><option>Fearful</option><option>Frustrated</option><option>Disciplined</option></select></div>
+        <div class="field full"><label>Lessons / Notes</label><textarea id="notes" placeholder="What did you learn from this trade?"></textarea></div>
+      </div>
+      <button class="btn" type="submit">Save trade</button>
+    </form>
+  </div>
+  <div class="card table-wrap">
+    <h3>Trade history</h3>
+    <table><thead><tr><th>Date</th><th>Symbol</th><th>Direction</th><th>P&L</th><th>R:R</th><th>Action</th></tr></thead>
+    <tbody id="tradeRows"></tbody></table>
+    <div id="tradeEmpty" class="empty">No trades recorded yet.</div>
+  </div>
+</section>
+
+<section class="page" id="calendar">
+  <div class="card">
+    <h3>Trading calendar</h3>
+    <p class="muted">Your recorded trades, organised by date.</p>
+    <div id="calendarContent"></div>
+  </div>
+</section>
+
+<section class="page" id="news">
+  <div class="card">
+    <h3>Market news & events</h3>
+    <p class="muted">Add important events you want to remember. This section does not automatically fetch live news.</p>
+    <form id="eventForm">
+      <div class="form-grid">
+        <div class="field"><label>Event date</label><input type="date" id="eventDate" required></div>
+        <div class="field"><label>Event title</label><input id="eventTitle" placeholder="e.g. CPI release" required></div>
+        <div class="field full"><label>Details</label><textarea id="eventDetails" placeholder="Add event notes..."></textarea></div>
+      </div>
+      <button class="btn">Add event</button>
+    </form>
+  </div>
+  <div class="card"><h3>Saved events</h3><div id="eventsList"></div></div>
+</section>
+
+<section class="page" id="strategy">
+  <div class="card">
+    <span class="pill">YOUR TRADING FRAMEWORK</span>
+    <h2>Market Architect Pullback Strategy ⚙</h2>
+    <p class="muted">A structured approach to identifying pullbacks within a broader market direction.</p>
+    <h3>1. Higher-timeframe analysis</h3>
+    <ul><li>Identify higher-timeframe order flow and directional bias.</li>
+    <li>Mark the current swing high and swing low.</li>
+    <li>Identify the swing point that led to a break of structure.</li>
+    <li>Mark relevant supply and demand zones.</li>
+    <li>Identify important liquidity areas.</li></ul>
+    <h3>2. Wait for price to reach your area</h3>
+    <ul><li>Wait for price to approach your planned point of interest.</li>
+    <li>Look for a liquidity sweep.</li>
+    <li>Avoid entering before your confirmation appears.</li></ul>
+    <h3>3. Entry confirmation</h3>
+    <ul><li>Move to the 15-minute chart.</li><li>Look for a market shift.</li>
+    <li>Look for a liquidity sweep and a clear reaction.</li>
+    <li>Plan your entry and invalidation point.</li></ul>
+    <h3>4. Risk and trade management</h3>
+    <ul><li>Define risk before considering a trade.</li><li>Set your stop at the invalidation point.</li>
+    <li>Identify a logical target around relevant supply or demand.</li>
+    <li>Review execution rather than focusing only on profit.</li></ul>
+  </div>
+</section>
+
+<section class="page" id="edge">
+  <div class="card">
+    <h3>Pre-trade checklist</h3>
+    <p class="muted">Tick each item when you have checked it.</p>
+    <div id="checklist">
+      <label class="checkline"><input type="checkbox"> Higher-timeframe bias identified</label>
+      <label class="checkline"><input type="checkbox"> Swing range marked</label>
+      <label class="checkline"><input type="checkbox"> Supply or demand zone identified</label>
+      <label class="checkline"><input type="checkbox"> Liquidity area identified</label>
+      <label class="checkline"><input type="checkbox"> Price reached planned area</label>
+      <label class="checkline"><input type="checkbox"> Liquidity sweep confirmed</label>
+      <label class="checkline"><input type="checkbox"> Market shift confirmed</label>
+      <label class="checkline"><input type="checkbox"> Stop and target planned</label>
+      <label class="checkline"><input type="checkbox"> Risk reviewed</label>
+      <label class="checkline"><input type="checkbox"> Emotion and discipline checked</label>
+    </div>
+    <button class="btn secondary" id="resetChecks">Reset checklist</button>
+  </div>
+  <div class="card">
+    <h3>Trading reminders</h3>
+    <p>• No setup means no trade.</p>
+    <p>• Do not chase price.</p>
+    <p>• Wait for confirmation.</p>
+    <p>• Follow the plan, not emotions.</p>
+    <p>• Review the process, not just the outcome.</p>
+  </div>
+</section>
+
+<section class="page" id="chat">
+  <div class="card">
+    <span class="pill">EDGEGO ASSISTANT</span>
+    <h2>✦ Edge AI Chat</h2>
+    <p class="muted">Ask questions about trading concepts, your strategy, journaling and discipline.</p>
+    <div class="chat-box" id="chatBox">
+      <div class="message bot">Welcome to EdgeGO! I'm your trading study assistant. Ask me about your pullback strategy, trade journaling, risk concepts or trading psychology.</div>
+    </div>
+    <form class="chat-input" id="chatForm">
+      <input id="chatInput" placeholder="Ask EdgeGO something..." autocomplete="off" required>
+      <button class="btn">Send</button>
+    </form>
+    <p class="muted" style="font-size:11px;margin-top:12px">Starter chat mode: responses are generated locally and are not a live AI service. Use demo data for practice and learning.</p>
+  </div>
+</section>
+<footer>EDGEGO • TRADE • PLAN • GROW</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const read = (key, fallback=[]) => {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch { return fallback; }
+};
+let trades = read("edgego_trades");
+let events = read("edgego_events");
+const save = () => {
+  localStorage.setItem("edgego_trades",JSON.stringify(trades));
+  localStorage.setItem("edgego_events",JSON.stringify(events));
+};
+const money = n => Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+document.querySelectorAll(".nav button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    $(btn.dataset.page).classList.add("active");
+    $("pageTitle").textContent=btn.textContent.trim().replace(/^[◫▤▦◉⌁✓✦]\s*/,"");
+    render();
+  });
+});
+
+$("themeBtn").onclick=()=>{
+  document.body.classList.toggle("dark");
+  localStorage.setItem("edgego_dark",document.body.classList.contains("dark"));
+};
+if(localStorage.getItem("edgego_dark")==="true")document.body.classList.add("dark");
+
+$("date").value=new Date().toISOString().slice(0,10);
+$("eventDate").value=new Date().toISOString().slice(0,10);
+
+$("tradeForm").onsubmit=e=>{
+  e.preventDefault();
+  const trade={
+    id:Date.now(),date:$("date").value,symbol:$("symbol").value.trim().toUpperCase(),
+    direction:$("direction").value,session:$("session").value,
+    entry:$("entry").value,exit:$("exit").value,sl:$("sl").value,tp:$("tp").value,
+    pnl:Number($("pnl").value),rr:Number($("rr").value||0),
+    quality:$("quality").value,emotion:$("emotion").value,notes:$("notes").value
+  };
+  trades.unshift(trade);save();e.target.reset();
+  $("date").value=new Date().toISOString().slice(0,10);render();
+};
+function deleteTrade(id){
+  if(!confirm("Delete this trade?"))return;
+  trades=trades.filter(t=>t.id!==id);save();render();
+}
+$("eventForm").onsubmit=e=>{
+  e.preventDefault();
+  events.unshift({date:$("eventDate").value,title:$("eventTitle").value,details:$("eventDetails").value});
+  save();e.target.reset();$("eventDate").value=new Date().toISOString().slice(0,10);render();
+};
+function render(){
+  const total=trades.length;
+  const pnl=trades.reduce((s,t)=>s+t.pnl,0);
+  const wins=trades.filter(t=>t.pnl>0).length;
+  const avg=total?trades.reduce((s,t)=>s+t.rr,0)/total:0;
+  $("totalTrades").textContent=total;
+  $("netPnl").textContent=money(pnl);
+  $("netPnl").className=pnl>=0?"good":"bad";
+  $("winRate").textContent=(total?wins/total*100:0).toFixed(1)+"%";
+  $("avgRR").textContent=avg.toFixed(2);
+
+  $("tradeRows").innerHTML=trades.map(t=>`
+    <tr><td>${esc(t.date)}</td><td>${esc(t.symbol)}</td><td>${esc(t.direction)}</td>
+    <td class="${t.pnl>=0?'good':'bad'}">${money(t.pnl)}</td><td>${Number(t.rr).toFixed(2)}</td>
+    <td><button class="btn secondary" onclick="deleteTrade(${t.id})">Delete</button></td></tr>`).join("");
+  $("tradeEmpty").style.display=total?"none":"block";
+
+  const recent=trades.slice(0,5);
+  $("recentTrades").innerHTML=recent.map(t=>`
+    <tr><td>${esc(t.date)}</td><td>${esc(t.symbol)}</td><td>${esc(t.direction)}</td>
+    <td class="${t.pnl>=0?'good':'bad'}">${money(t.pnl)}</td></tr>`).join("");
+  $("recentEmpty").style.display=recent.length?"none":"block";
+
+  let running=0,points=[0];
+  [...trades].reverse().forEach(t=>{running+=t.pnl;points.push(running)});
+  const min=Math.min(0,...points),max=Math.max(1,...points);
+  const coords=points.map((v,i)=>{
+    const x=i/(Math.max(1,points.length-1))*680+10;
+    const y=160-((v-min)/(max-min))*140;
+    return `${x},${y}`;
+  }).join(" ");
+  $("equityChart").innerHTML=`<polyline points="${coords}" fill="none" stroke="#2878f0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  const dates=[...new Set(trades.map(t=>t.date))].sort().reverse();
+  $("calendarContent").innerHTML=dates.length?dates.map(d=>{
+    const day=trades.filter(t=>t.date===d);
+    return `<div class="event"><strong>${esc(d)}</strong><br>${day.map(t=>`${esc(t.symbol)} • ${esc(t.direction)} • ${money(t.pnl)}`).join("<br>")}</div>`;
+  }).join(""):'<div class="empty">Your trading calendar is empty.</div>';
+
+  $("eventsList").innerHTML=events.length?events.map(ev=>
+    `<div class="event"><strong>${esc(ev.date)} — ${esc(ev.title)}</strong><p>${esc(ev.details)}</p></div>`
+  ).join(""):'<div class="empty">No saved events yet.</div>';
+}
+function esc(s){
+  return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+$("exportBtn").onclick=()=>{
+  if(!trades.length){alert("There are no trades to export yet.");return;}
+  const cols=["date","symbol","direction","session","entry","exit","sl","tp","pnl","rr","quality","emotion","notes"];
+  const csv=[cols.join(","),...trades.map(t=>cols.map(k=>'"'+String(t[k]??"").replace(/"/g,'""')+'"').join(","))].join("\n");
+  const a=document.createElement("a");
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.href=url;a.download="edgego-trading-journal.csv";a.click();URL.revokeObjectURL(url);
+};
+$("resetChecks").onclick=()=>{
+  document.querySelectorAll("#checklist input").forEach(c=>c.checked=false);
+};
+function addMessage(text,type){
+  const d=document.createElement("div");
+  d.className="message "+type;d.textContent=text;
+  $("chatBox").appendChild(d);$("chatBox").scrollTop=$("chatBox").scrollHeight;
+}
+function reply(q){
+  const s=q.toLowerCase();
+  if(s.includes("pullback")||s.includes("strategy"))
+    return "Your Market Architect Pullback Strategy focuses on higher-timeframe direction, a planned supply or demand area, a liquidity sweep and a confirmed market shift. Remember to wait for your complete setup rather than predicting it.";
+  if(s.includes("journal")||s.includes("review"))
+    return "A useful journal review asks: Did you follow your plan? Was your entry confirmed? Was risk defined beforehand? What did you learn? Review execution as well as the result.";
+  if(s.includes("risk")||s.includes("stop loss")||s.includes("sl"))
+    return "Risk management starts before a trade. Understand the possible loss, define the invalidation point and avoid risking money you cannot afford to lose. Practise with demo data.";
+  if(s.includes("emotion")||s.includes("psychology")||s.includes("discipline"))
+    return "Pause and identify what you are feeling before making a decision. Impatience, frustration and the urge to recover a loss can affect judgement. It is okay to step away.";
+  if(s.includes("rr")||s.includes("reward"))
+    return "Risk-to-reward compares the planned potential reward with the amount at risk. For example, a 1:2 ratio means the planned reward is twice the planned risk. It does not guarantee that the target will be reached.";
+  if(s.includes("liquidity")||s.includes("sweep"))
+    return "A liquidity sweep is a move beyond a visible price level where orders may be clustered. In your strategy, treat it as something to assess alongside structure and confirmation, not as a standalone entry signal.";
+  if(s.includes("hello")||s.includes("hi ")||s==="hi")
+    return "Hey! Welcome to EdgeGO. What trading concept would you like to learn about today?";
+  return "Good question. I can help with your pullback strategy, market structure, journaling, risk concepts and trading psychology. Try asking about one of those topics. This starter version uses built-in responses rather than a live AI model.";
+}
+$("chatForm").onsubmit=e=>{
+  e.preventDefault();
+  const q=$("chatInput").value.trim();if(!q)return;
+  addMessage(q,"user");$("chatInput").value="";
+  setTimeout(()=>addMessage(reply(q),"bot"),250);
+};
+render();
+</script>
+</body>
+</html>
